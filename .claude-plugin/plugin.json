@@ -1,0 +1,6 @@
+{
+  "name": "football-predictor",
+  "version": "0.1.0",
+  "description": "Вероятностный прогноз футбольных матчей: Elo → Пуассон, рынки, снятие маржи, журнал прогнозов. Данные и факты о провайдерах — через nutmeg/football-docs.",
+  "author": { "name": "Serikbolsyn" }
+}

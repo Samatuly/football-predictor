@@ -1,0 +1,1 @@
+source: https://raw.githubusercontent.com/martj42/international_results/master/results.csv | license CC0-1.0 | downloaded 2026-11-13

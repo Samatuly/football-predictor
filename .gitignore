@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Скачанные данные: большие и восстанавливаются по data/raw/*.SOURCE.txt
+data/raw/*
+!data/raw/*.SOURCE.txt
+data/processed/
+data/cache/
+
+# Личный журнал прогнозов
+predictions/ledger.jsonl
+
+# Резервные копии
+*.bak
+
+# Сгенерированные отчёты, прогнозы и ручные данные
+predictions/
+data/manual/*.csv

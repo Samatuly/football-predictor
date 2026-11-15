@@ -1,10 +1,14 @@
 # football-predictor
 
+![version](https://img.shields.io/badge/version-0.1.0-blue) ![status](https://img.shields.io/badge/status-pre--release-orange) ![license](https://img.shields.io/badge/license-MIT-green)
+
 **A Claude Code plugin for probabilistic football match forecasting.**
 
 The plugin estimates team strength, computes probabilities for match outcomes and the main betting markets, and compares them with bookmaker odds after removing the margin. Every model is validated with walk-forward backtests on historical international matches.
 
 > ⚠️ The model produces probability estimates, not betting advice. See the [Disclaimer](#disclaimer).
+
+> **Status: v0.1.0 pre-release.** The core models and the `predict` skill work; several other skills are still placeholders (see the [Roadmap](#roadmap)).
 
 ## Features
 

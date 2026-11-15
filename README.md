@@ -1,22 +1,22 @@
 # football-predictor
 
-**Плагин Claude Code для вероятностного прогноза футбольных матчей.**
+**A Claude Code plugin for probabilistic football match forecasting.**
 
-Плагин оценивает силу команд, считает вероятности исходов и основных рынков и сравнивает их с коэффициентами букмекера, предварительно сняв маржу. Каждая модель проверена бэктестом на исторических матчах сборных.
+The plugin estimates team strength, computes probabilities for match outcomes and the main betting markets, and compares them with bookmaker odds after removing the margin. Every model is validated with walk-forward backtests on historical international matches.
 
-> Плагин даёт вероятностную оценку, а не рекомендации для ставок.
+> ⚠️ The model produces probability estimates, not betting advice. See the [Disclaimer](#disclaimer).
 
-## Возможности
+## Features
 
-- **Две модели.** Основная: Диксон–Коулз с затуханием по времени. Запасная: Elo → Пуассон.
-- **Рынки.** 1X2, двойной шанс, тоталы, «обе забьют», точный счёт, исходы таймов.
-- **Сравнение с рынком.** Снятие маржи с коэффициентов, поиск расхождений между моделью и букмекером.
-- **Проверка качества.** Walk-forward бэктест (log-loss, Brier, RPS) и калибровка вероятностей.
-- **Журнал прогнозов.** Каждый прогноз можно записать, чтобы потом сверить его с результатом.
+- **Two models.** Primary: Dixon–Coles with time decay. Fallback: Elo → Poisson.
+- **Markets.** 1X2, double chance, totals, both teams to score, correct score, half-time outcomes.
+- **Market comparison.** Margin removal from bookmaker odds and detection of gaps between the model and the market.
+- **Quality checks.** Walk-forward backtesting (log-loss, Brier score, RPS) and probability calibration.
+- **Prediction ledger.** Each forecast can be logged and later checked against the actual result.
 
-## Установка
+## Installation
 
-Нужны Python 3.10+, `numpy` и [Claude Code](https://claude.com/claude-code).
+Requires Python 3.10+, `numpy` and [Claude Code](https://claude.com/claude-code).
 
 ```bash
 git clone https://github.com/samatuly/football-predictor.git
@@ -24,68 +24,81 @@ cd football-predictor
 claude --plugin-dir .
 ```
 
-В Claude Code основной скилл вызывается командой `/football-predictor:predict`, например:
+In Claude Code, the main skill is invoked with `/football-predictor:predict`, for example:
 
 ```
-/football-predictor:predict Казахстан — Словакия, коэффициенты 4.2 / 3.4 / 1.9
+/football-predictor:predict Kazakhstan vs Slovakia, odds 4.2 / 3.4 / 1.9
 ```
 
-## Данные
+## Data
 
-Исторические результаты не хранятся в репозитории. Скачайте их в `data/raw/` по ссылкам из файлов `data/raw/*.SOURCE.txt`:
+Historical results are not stored in the repository. Download them into `data/raw/` using the links in `data/raw/*.SOURCE.txt`:
 
-| Файл | Источник | Лицензия |
+| File | Source | License |
 |---|---|---|
 | `results.csv` | [martj42/international_results](https://github.com/martj42/international_results) | CC0-1.0 |
-| `en.teams.tsv` | [eloratings.net](https://www.eloratings.net) | не указана |
+| `en.teams.tsv` | [eloratings.net](https://www.eloratings.net) | not specified |
 
-Свои дополнительные результаты можно положить в `data/manual/*.csv`: тот же формат плюс столбец `source`.
+You can add your own results in `data/manual/*.csv`, using the same format plus a `source` column.
 
-## Запуск из командной строки
+## Command-line usage
 
 ```bash
-# Прогноз тура (Диксон–Коулз)
+# Forecast a round of matches (Dixon–Coles)
 python core/predict.py --fixtures core/tests/fixtures/2026-11-13.csv --as-of 2026-11-13
 
-# То же на модели Elo → Пуассон
+# Same with the Elo → Poisson model
 python core/predict.py --model elo_poisson --elo <World.tsv> --fixtures core/tests/fixtures/2026-11-13.csv
 
-# Бэктест, калибровка и сравнение моделей
-python core/backtest_cli.py       --results data/raw/results.csv --start 2010-01-01
-python core/calibrate_cli.py      --results data/raw/results.csv
+# Backtesting, calibration and model comparison
+python core/backtest_cli.py         --results data/raw/results.csv --start 2010-01-01
+python core/calibrate_cli.py        --results data/raw/results.csv
 python core/calibrate_totals_cli.py --results data/raw/results.csv
-python core/compare_cli.py        --results data/raw/results.csv
+python core/compare_cli.py          --results data/raw/results.csv
 
-# Тесты
+# Tests
 python -m unittest discover -s core/tests
 ```
 
-Формат файла матчей:
+Fixtures file format:
 
 ```
 home,away,odds_1,odds_x,odds_2,odds_under25,odds_over25,neutral
 ```
 
-Команды указываются кодами eloratings.net. Коэффициенты и `neutral` необязательны.
+Teams are identified by eloratings.net codes. Odds and `neutral` are optional.
 
-## Структура
+## Project structure
 
-| Путь | Назначение |
+| Path | Purpose |
 |---|---|
-| `skills/` | Скиллы Claude Code: прогноз, данные, коэффициенты, бэктест, рейтинги |
-| `agents/` | Вспомогательные агенты: сбор контекста матча, ревью модели |
-| `core/predictor_core/` | Модели, рынки, метрики, работа с данными |
-| `core/*.py` | Командные утилиты |
-| `core/tests/` | Тесты |
+| `skills/` | Claude Code skills: prediction, data, odds, backtesting, ratings |
+| `agents/` | Helper agents: match context research, model review |
+| `core/predictor_core/` | Models, markets, metrics, data handling |
+| `core/*.py` | Command-line tools |
+| `core/tests/` | Tests |
 
-## Дорожная карта
+## Roadmap
 
-- [x] Elo → Пуассон, рынки, снятие маржи, журнал
-- [x] Бэктест и калибровка (1X2, тоталы)
-- [x] Диксон–Коулз как основная модель
-- [ ] Клубные турниры, xG, смешивание модели с рынком
-- [ ] Сверка журнала с результатами, симуляция турниров
+- [x] Elo → Poisson, markets, margin removal, prediction ledger
+- [x] Backtesting and calibration (1X2, totals)
+- [x] Dixon–Coles as the primary model
+- [ ] Club competitions, xG, blending the model with market odds
+- [ ] Checking the ledger against results, tournament simulation
 
-## Лицензия
+> Skill prompts and generated reports are currently in Russian.
 
-[MIT](LICENSE). Заимствованные идеи и источники перечислены в [NOTICE.md](NOTICE.md).
+## Disclaimer
+
+This project is for research and educational purposes only.
+
+- The model outputs **probability estimates**, not predictions of certain outcomes and **not betting advice**.
+- Football is highly random. Even a well-calibrated model will be wrong on many individual matches.
+- A gap between the model and the bookmaker's odds is not a guaranteed edge. Models can miss information the market has, such as injuries, line-ups or motivation.
+- Past backtest performance does not guarantee future results.
+- The author accepts no responsibility for any financial losses resulting from use of this software.
+- If you choose to bet, follow the laws of your jurisdiction, only bet what you can afford to lose, and seek help if gambling stops being fun (for example, [BeGambleAware](https://www.begambleaware.org)).
+
+## License
+
+[MIT](LICENSE). Borrowed ideas and data sources are listed in [NOTICE.md](NOTICE.md).

@@ -1,6 +1,18 @@
 {
   "name": "football-predictor",
   "version": "0.1.0",
-  "description": "Вероятностный прогноз футбольных матчей: Elo → Пуассон, рынки, снятие маржи, журнал прогнозов. Данные и факты о провайдерах — через nutmeg/football-docs.",
-  "author": { "name": "Serikbolsyn" }
+  "description": "Вероятностные прогнозы футбольных матчей для Claude Code: модели Диксона–Коулза и Elo → Пуассон, рынки 1X2, тоталы, обе забьют и точный счёт, сравнение с коэффициентами без маржи, бэктест и калибровка.",
+  "author": {
+    "name": "Serikbolsyn"
+  },
+  "license": "MIT",
+  "keywords": [
+    "football",
+    "soccer",
+    "prediction",
+    "dixon-coles",
+    "elo",
+    "poisson",
+    "betting-odds"
+  ]
 }

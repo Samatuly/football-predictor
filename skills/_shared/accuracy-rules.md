@@ -1,24 +1,22 @@
-# football-predictor — правила честности
+# football-predictor: accuracy rules
 
-Цифры даёт модель, контекст и объяснение — агент, правильность — проверки.
-Этот файл — единственный источник правил плагина; каждый скилл читает его перед работой.
+The model supplies the numbers, the agent supplies context and explanation, and the checks supply correctness.
+This file is the single source of the plugin's rules; every skill reads it before working.
 
-1. **Вероятности — только из модели** (`core/`). Claude не придумывает проценты. Если ядро не может посчитать — так и скажи.
-2. **Нет утечек будущего.** Признаки строятся только из данных до даты прогноза (`as_of`).
-3. **Нет проверки — нет доверия.** Называй модель и её статус проверки (см. «Статус моделей»).
-4. **Метрики качества:** log-loss, Brier, RPS, калибровка, сравнение с рынком. Не процент угаданных.
-5. **Маржа снимается всегда** перед сравнением с рынком; называй метод (сейчас — пропорциональный).
-6. **Расхождение с рынком — не «ценная ставка»**, пока модель не обыграла рынок на бэктесте.
-7. **Склейка по ID**, а не по названиям; несовпавшие строки — в отчёт.
-8. **Факты о провайдерах** — из football-docs (nutmeg), с названием документа; варианты xG не смешиваются.
-9. **В каждом отчёте** — разделы «Источники», «Допущения», «Ограничения» и уровень уверенности.
-10. **Не совет ставить.** Без «верняков» и «экспрессов дня»; у экспрессов называй итоговую вероятность (произведение).
+1. **Probabilities come only from the model** (`core/`). Claude does not invent percentages. If the core cannot compute something, say so.
+2. **No look-ahead leakage.** Features are built only from data before the forecast date (`as_of`).
+3. **No validation, no trust.** Name the model and its validation status (see "Model status").
+4. **Quality metrics:** log-loss, Brier, RPS, calibration, comparison with the market. Not the share of correct picks.
+5. **Always remove the margin** before comparing with the market, and name the method (currently proportional).
+6. **A gap from the market is not a "value bet"** until the model has beaten the market in a backtest.
+7. **Join by ID**, not by name; unmatched rows go into the report.
+8. **Provider facts** come from football-docs (nutmeg), with the document named; xG variants are never mixed.
+9. **Every report** has "Sources", "Assumptions" and "Limitations" sections and a confidence level.
+10. **Not betting advice.** No "sure things" or "accas of the day"; for accumulators, state the combined probability (the product).
 
-## Статус моделей
+## Model status
 
-| Модель | Проверка | Известные слабости |
+| Model | Validation | Known weaknesses |
 |---|---|---|
-| `elo_poisson` (CALIBRATED) | 1X2 и рынки голов откалиброваны на сборных 1990–2009, проверены на 2010–2026 | ТБ1.5 завышен примерно на 5 п.п.; края ТБ2.5/ОЗ неточны; тотал не учитывает стиль команд; только сборные; с рынком на истории не сравнивалась |
-| **`dixon_coles`** (основная в `/predict`, half_life 1460 дн.) | Walk-forward на сборных 2010–2026: лучше `elo_poisson` по 1X2 и рынкам голов, ТБ1.5 откалиброван | Свежесть зависит от `results.csv` (смотри `days_stale`); команды только из `team_map.csv`; только сборные; с рынком на истории не сравнивалась; на туре 13.11 по 1X2 рынок был точнее |
-
-
+| `elo_poisson` (CALIBRATED) | 1X2 and goal markets calibrated on international matches 1990–2009, tested on 2010–2026 | Over 1.5 is overestimated by about 5 pp; the edges of O2.5/BTTS are imprecise; the total ignores team style; international teams only; not compared with the market on history |
+| **`dixon_coles`** (default in `/predict`, half_life 1460 days) | Walk-forward on international matches 2010–2026: better than `elo_poisson` on 1X2 and goal markets, O1.5 is calibrated | Freshness depends on `results.csv` (see `days_stale`); only teams in `team_map.csv`; international teams only; not compared with the market on history; in the 13 Nov round the market was more accurate on 1X2 |

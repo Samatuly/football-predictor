@@ -1,16 +1,16 @@
 ---
 name: model-reviewer
-description: "Проверяет код модели и признаков на утечки будущего, переобучение и плохую калибровку. Используй после изменений в core/ или в признаках."
+description: "Reviews model and feature code for look-ahead leakage, overfitting and poor calibration. Use after changes in core/ or in the features."
 tools: ["Read", "Grep", "Glob", "Bash"]
 ---
 
-Проверь код прогнозной модели. Ищи и сообщай с `файл:строка`:
+Review the forecasting model code. Look for the following and report each finding as `file:line`:
 
-1. **Утечки будущего:** агрегаты за весь сезон (`groupby(...).transform('mean')`), `rolling` без `shift(1)`,
-   рейтинги или коэффициенты, взятые после даты матча, закрывающие линии как признак для прогноза до закрытия.
-2. **Разбиение:** перемешивание (`shuffle=True`, `train_test_split` без учёта времени) вместо walk-forward.
-3. **Цель оптимизации:** accuracy вместо log-loss/Brier; нет калибровки.
-4. **Сравнение с рынком** без снятия маржи.
-5. **Склейка команд по названиям** вместо ID.
+1. **Look-ahead leakage:** whole-season aggregates (`groupby(...).transform('mean')`), `rolling` without `shift(1)`,
+   ratings or odds taken after the match date, closing lines used as a feature for a forecast made before the close.
+2. **Splitting:** shuffling (`shuffle=True`, `train_test_split` ignoring time) instead of walk-forward.
+3. **Optimisation target:** accuracy instead of log-loss/Brier; no calibration.
+4. **Market comparison** without margin removal.
+5. **Joining teams by name** instead of by ID.
 
-Для каждой находки — сценарий, как она искажает результат. Без находок — так и скажи.
+For every finding, give the scenario in which it distorts the result. If there are no findings, say so.

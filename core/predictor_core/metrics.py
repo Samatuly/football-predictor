@@ -1,7 +1,7 @@
-"""Метрики качества вероятностных прогнозов 1X2.
+"""Quality metrics for probabilistic 1X2 forecasts.
 
-Исход кодируется индексом: 0 — П1, 1 — Х, 2 — П2. probs — (p1, px, p2).
-Для всех метрик «меньше — лучше».
+The outcome is encoded as an index: 0 = home win, 1 = draw, 2 = away win. probs = (p1, px, p2).
+For all metrics, lower is better.
 """
 from __future__ import annotations
 
@@ -16,12 +16,12 @@ def log_loss(probs: Sequence[float], outcome: int) -> float:
 
 
 def brier(probs: Sequence[float], outcome: int) -> float:
-    """Многоклассовый Brier: сумма квадратов ошибок по трём исходам (0..2)."""
+    """Multi-class Brier score: sum of squared errors over the three outcomes (0..2)."""
     return sum((p - (1.0 if k == outcome else 0.0)) ** 2 for k, p in enumerate(probs))
 
 
 def rps(probs: Sequence[float], outcome: int) -> float:
-    """Ranked Probability Score: учитывает порядок П1 < Х < П2 (0..1)."""
+    """Ranked Probability Score: respects the ordering home < draw < away (0..1)."""
     cp = co = s = 0.0
     for k in range(len(probs) - 1):
         cp += probs[k]
@@ -44,7 +44,7 @@ def summarize(rows: list[tuple[Sequence[float], int]]) -> dict[str, float]:
 
 
 def calibration(rows: list[tuple[Sequence[float], int]], outcome: int, bins: int = 10) -> list[dict]:
-    """Таблица калибровки для одного исхода: средний прогноз против фактической частоты по корзинам."""
+    """Calibration table for one outcome: mean forecast vs observed frequency per bin."""
     buckets: list[list[tuple[float, int]]] = [[] for _ in range(bins)]
     for p, o in rows:
         b = min(int(p[outcome] * bins), bins - 1)

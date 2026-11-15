@@ -1,7 +1,7 @@
 {
   "name": "football-predictor",
   "version": "0.1.0",
-  "description": "Вероятностные прогнозы футбольных матчей для Claude Code: модели Диксона–Коулза и Elo → Пуассон, рынки 1X2, тоталы, обе забьют и точный счёт, сравнение с коэффициентами без маржи, бэктест и калибровка.",
+  "description": "Probabilistic football match forecasts for Claude Code: Dixon–Coles and Elo → Poisson models, 1X2, totals, both-teams-to-score and correct-score markets, comparison with bookmaker odds after margin removal, backtesting and calibration.",
   "author": {
     "name": "Serikbolsyn"
   },

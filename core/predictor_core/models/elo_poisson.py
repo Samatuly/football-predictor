@@ -1,13 +1,13 @@
-"""Модель Elo -> Пуассон (перенос scripts/m.py) с калибруемыми параметрами.
+"""Elo -> Poisson model (ported from scripts/m.py) with calibratable parameters.
 
-1. dr = elo_scale * (Elo_дом - Elo_гости) + home_adv (на нейтральном поле home_adv = 0).
-2. We = 1 / (1 + 10^(-dr/400)) — ожидаемый результат Elo.
-3. Тотал T = base_total + total_slope * |dr|.
-4. T делится на λ_дом и λ_гости так, чтобы P(П1) + P(Х)/2 = We (бисекция),
-   с поправкой низких счетов draw_delta (0-0 и 1-1 вверх, 1-0 и 0-1 вниз).
+1. dr = elo_scale * (Elo_home - Elo_away) + home_adv (home_adv = 0 on a neutral venue).
+2. We = 1 / (1 + 10^(-dr/400)) is the Elo expected result.
+3. Total T = base_total + total_slope * |dr|.
+4. T is split into λ_home and λ_away so that P(home) + P(draw)/2 = We (bisection),
+   with the low-score correction draw_delta (0-0 and 1-1 up, 1-0 and 0-1 down).
 
-Параметры по умолчанию — исходные из отчёта 13.11 (scripts/m.py).
-Откалиброванные — CALIBRATED (подобраны на 1990–2009, проверены на 2010–2026).
+Default parameters are the original ones from the 13 Nov report (scripts/m.py).
+Calibrated parameters are in CALIBRATED (fitted on 1990–2009, tested on 2010–2026).
 """
 from __future__ import annotations
 
@@ -16,12 +16,12 @@ from dataclasses import asdict, dataclass
 from ..scoregrid import ScoreGrid
 
 NAME = "elo_poisson"
-VALIDATED = True  # walk-forward бэктест 2010–2026 на матчах сборных; с рынком не сравнивалась
+VALIDATED = True  # walk-forward backtest 2010–2026 on international matches; not compared with the market
 
 ASSUMPTIONS = (
-    "Рейтинг Elo сборных отражает силу команды на дату матча",
-    "Голы команд — Пуассоны с поправкой низких счетов",
-    "Параметры подобраны на матчах сборных 1990–2009; к клубам не переносятся",
+    "The Elo rating of a national team reflects its strength on the match date",
+    "Team goals are Poisson with a low-score correction",
+    "Parameters were fitted on international matches 1990–2009; they do not transfer to clubs",
 )
 
 
@@ -38,8 +38,8 @@ class EloPoissonParams:
 
 
 ORIGINAL = EloPoissonParams()
-# Заполняется по итогам core/calibrate_cli.py
-# base_total/total_slope — из калибровки рынков голов (2026-11-13_totals_calibration.md)
+# Filled in from the results of core/calibrate_cli.py
+# base_total/total_slope come from the goal-market calibration (core/calibrate_totals_cli.py)
 CALIBRATED = EloPoissonParams(home_adv=100.0, base_total=2.3, total_slope=0.0021,
                               elo_scale=0.8, draw_delta=0.2)
 

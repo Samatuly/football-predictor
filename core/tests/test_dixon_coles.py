@@ -1,4 +1,4 @@
-"""Тесты модели Диксона–Коулза."""
+"""Tests for the Dixon–Coles model."""
 import random
 import sys
 import unittest
@@ -26,7 +26,7 @@ def _poisson(rng: random.Random, lam: float) -> int:
 
 
 def synthetic(n_rounds: int = 60, seed: int = 1) -> list[Match]:
-    """Лига из 6 команд с известной силой атаки."""
+    """A league of 6 teams with known attacking strength."""
     rng = random.Random(seed)
     strength = {"A": 0.5, "B": 0.25, "C": 0.0, "D": 0.0, "E": -0.25, "F": -0.5}
     teams = list(strength)
@@ -42,7 +42,7 @@ def synthetic(n_rounds: int = 60, seed: int = 1) -> list[Match]:
     return out
 
 
-@unittest.skipUnless(HAVE_NP, "нужен numpy")
+@unittest.skipUnless(HAVE_NP, "numpy required")
 class TestDixonColes(unittest.TestCase):
     def setUp(self):
         from predictor_core.models import dixon_coles as dc
@@ -68,7 +68,7 @@ class TestDixonColes(unittest.TestCase):
         self.assertGreater(fit.home, 0)
 
     def test_no_future_leak(self):
-        """Подгонка на дату не зависит от матчей в эту дату и позже."""
+        """A fit for a date does not depend on matches on or after that date."""
         ms = synthetic()
         cut = ms[len(ms) // 2].date
         future_changed = [m if m.date < cut else Match(m.date, m.home, m.away, 9, 0, m.tournament, m.neutral)

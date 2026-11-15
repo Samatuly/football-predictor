@@ -1,4 +1,4 @@
-"""CLI: подбор параметров на обучающем окне, проверка на тестовом.
+"""CLI: fit parameters on the training window, evaluate on the test window.
 
 python core/calibrate_cli.py --results data/raw/results.csv
 """
@@ -25,34 +25,34 @@ def main() -> None:
     ap.add_argument("--train-start", default="1990-01-01")
     ap.add_argument("--train-end", default="2009-12-31")
     ap.add_argument("--test-start", default="2010-01-01")
-    ap.add_argument("--out", help="JSON с итогами")
+    ap.add_argument("--out", help="JSON with the results")
     a = ap.parse_args()
 
     matches = load_results(a.results)
     train = calibrate.collect(matches, date.fromisoformat(a.train_start), date.fromisoformat(a.train_end))
     test = calibrate.collect(matches, date.fromisoformat(a.test_start), None)
-    print(f"Обучение: {len(train)} матчей; тест: {len(test)} матчей\n")
+    print(f"Train: {len(train)} matches; test: {len(test)} matches\n")
 
     best = calibrate.fit(train)
     out = {"params_original": ORIGINAL.as_dict(), "params_calibrated": best.as_dict(),
            "n_train": len(train), "n_test": len(test)}
-    for label, p in (("исходная", ORIGINAL), ("откалиброванная", best)):
+    for label, p in (("original", ORIGINAL), ("calibrated", best)):
         for window, rows in (("train", train), ("test", test)):
             s = calibrate.evaluate(rows, p)
             scored = s.pop("_scored")
             out[f"{label}_{window}"] = s
             if window == "test":
                 out[f"{label}_calibration_test"] = {k: calibrate.calibration_table(scored, i)
-                                                    for i, k in enumerate(("П1", "Х", "П2"))}
+                                                    for i, k in enumerate(("H", "D", "A"))}
 
-    print("\nОкно     Модель            log-loss  Brier   RPS    Угадано  Голы(м/ф)   Ничьи(м/ф)")
+    print("\nWindow   Model             log-loss  Brier   RPS    Accuracy Goals(m/a)  Draws(m/a)")
     for window in ("train", "test"):
-        for label in ("исходная", "откалиброванная"):
+        for label in ("original", "calibrated"):
             s = out[f"{label}_{window}"]
             print(f"{window:8} {label:17} {s['log_loss']:.4f}  {s['brier']:.4f}  {s['rps']:.4f}  {s['accuracy']:6.1%}"
                   f"   {s['goals_pred']:.2f}/{s['goals_actual']:.2f}   {s['draws_pred']:.1%}/{s['draws_actual']:.1%}")
-    for label in ("исходная", "откалиброванная"):
-        print(f"\nКалибровка на тесте, {label}:")
+    for label in ("original", "calibrated"):
+        print(f"\nCalibration on the test window, {label}:")
         for k, rows in out[f"{label}_calibration_test"].items():
             print(f"  {k}: " + "  ".join(f"{r['predicted']:.2f}→{r['observed']:.2f}" for r in rows))
     if a.out:

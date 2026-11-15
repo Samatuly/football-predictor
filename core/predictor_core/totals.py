@@ -1,8 +1,8 @@
-"""Калибровка рынков голов (ТБ/ТМ 1.5/2.5/3.5, «обе забьют»).
+"""Calibration of goal markets (over/under 1.5/2.5/3.5, both teams to score).
 
-Параметры 1X2 (home_adv, elo_scale, draw_delta) фиксированы — их уже подобрали по 1X2.
-Подбираются только base_total и total_slope. Цель — сумма бинарных log-loss по четырём
-рынкам голов на обучающем окне. После подбора проверяется, что 1X2 на тесте не ухудшился.
+The 1X2 parameters (home_adv, elo_scale, draw_delta) are fixed: they were already fitted on 1X2.
+Only base_total and total_slope are fitted. The objective is the sum of binary log-losses over the four
+goal markets on the training window. After fitting, we check that 1X2 on the test window did not get worse.
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from .models import elo_poisson
 from .models.elo_poisson import EloPoissonParams
 from .ratings_elo import EloBook
 
-GoalRow = tuple[float, bool, int, int]  # (Elo_дом - Elo_гости, нейтральное, голы хозяев, голы гостей)
+GoalRow = tuple[float, bool, int, int]  # (Elo_home - Elo_away, neutral, home goals, away goals)
 
 LINES = {
     "over_1.5": lambda h, a: h + a > 1,
@@ -88,7 +88,7 @@ def evaluate(rows: list[GoalRow], p: EloPoissonParams, fast: bool = False) -> di
 
 
 def baseline(train: list[GoalRow], test: list[GoalRow]) -> dict:
-    """Базовый прогноз: частоты рынков голов на обучающем окне, одинаковые для всех матчей."""
+    """Base forecast: goal-market frequencies on the training window, identical for all matches."""
     rates = {k: sum(1 for _, _, h, a in train if f(h, a)) / len(train) for k, f in LINES.items()}
     ll = {k: sum(_bin_ll(rates[k], f(h, a)) for _, _, h, a in test) / len(test) for k, f in LINES.items()}
     return {"rates": rates, "log_loss": ll, "objective": sum(ll.values())}
@@ -102,7 +102,7 @@ GRID = {
 
 def fit(rows: list[GoalRow], start: EloPoissonParams, rounds: int = 3, log=print) -> EloPoissonParams:
     best, best_obj = start, evaluate(rows, start, fast=True)["objective"]
-    log(f"старт: {best_obj:.4f} base_total={best.base_total} total_slope={best.total_slope}")
+    log(f"start: {best_obj:.4f} base_total={best.base_total} total_slope={best.total_slope}")
     for r in range(rounds):
         improved = False
         for name, values in GRID.items():
@@ -111,7 +111,7 @@ def fit(rows: list[GoalRow], start: EloPoissonParams, rounds: int = 3, log=print
                 obj = evaluate(rows, cand, fast=True)["objective"]
                 if obj < best_obj - 1e-6:
                     best, best_obj, improved = cand, obj, True
-            log(f"проход {r + 1}, {name}: {best_obj:.4f} base_total={best.base_total} total_slope={best.total_slope}")
+            log(f"pass {r + 1}, {name}: {best_obj:.4f} base_total={best.base_total} total_slope={best.total_slope}")
         if not improved:
             break
     return best

@@ -1,12 +1,12 @@
 ---
 name: ratings
-description: "Пересчёт сил команд на дату (Elo, Диксон–Коулз). Этап 3."
+description: "Recomputing team strengths for a given date (Elo, Dixon–Coles). Stage 3."
 ---
 
 # ratings
 
-**Ещё не реализовано.** Пересчёт сил команд на дату (Elo, Диксон–Коулз). Этап 3.
+**Not implemented yet.** Recomputing team strengths for a given date (Elo, Dixon–Coles). Stage 3.
 
-Пока скилл не готов, скажи пользователю об этом и не подменяй расчёт рассуждением.
+Until this skill is ready, tell the user so and do not replace the calculation with reasoning.
 
-Правила плагина: `${CLAUDE_PLUGIN_ROOT}/skills/_shared/accuracy-rules.md`.
+Plugin rules: `${CLAUDE_PLUGIN_ROOT}/skills/_shared/accuracy-rules.md`.

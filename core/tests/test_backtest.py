@@ -1,4 +1,4 @@
-"""Тесты метрик и бэктеста, включая проверку на утечку будущего."""
+"""Tests for metrics and the backtest, including a look-ahead leakage check."""
 import sys
 import unittest
 from datetime import date, timedelta
@@ -23,7 +23,7 @@ class TestMetrics(unittest.TestCase):
         self.assertAlmostEqual(rps((1, 0, 0), 0), 0.0)
 
     def test_rps_order(self):
-        # промах «в соседний» исход штрафуется меньше, чем «через один»
+        # missing to an adjacent outcome is penalised less than missing by two
         self.assertLess(rps((0, 1, 0), 0), rps((0, 0, 1), 0))
 
     def test_uniform_brier(self):
@@ -32,7 +32,7 @@ class TestMetrics(unittest.TestCase):
 
 class TestNoLeakage(unittest.TestCase):
     def test_prediction_uses_only_past(self):
-        """Рейтинг на момент матча не зависит от его результата и от будущих матчей."""
+        """The rating at match time does not depend on its result or on future matches."""
         hist = [_m(i, "A", "B", 1, 0) for i in range(5)]
         target_win, target_loss = _m(10, "A", "B", 5, 0), _m(10, "A", "B", 0, 5)
         future = [_m(20, "A", "B", 0, 9)]
@@ -48,13 +48,13 @@ class TestNoLeakage(unittest.TestCase):
                          pre(hist + [target_loss] + future, target_loss))
 
     def test_backtest_outcome_independent(self):
-        """Прогноз на матч не меняется, если поменять его результат."""
+        """The forecast for a match does not change if its result is changed."""
         base = [_m(i, "A" if i % 2 else "B", "B" if i % 2 else "A", i % 3, 1) for i in range(80)]
         flipped = base[:-1] + [_m(79, base[-1].home, base[-1].away, 7, 0)]
         r1 = backtest.run(base, date(2000, 1, 1) + timedelta(days=79), min_games=10)
         r2 = backtest.run(flipped, date(2000, 1, 1) + timedelta(days=79), min_games=10)
         self.assertEqual(r1["n"], 1)
-        # одна и та же вероятность «хозяева не проиграли» при разных результатах -> одинаковый прогноз
+        # the same "home did not lose" probability for different results -> identical forecast
         name = next(iter(r1["summary"]))
         self.assertNotEqual(r1["summary"][name]["log_loss"], r2["summary"][name]["log_loss"])
         self.assertAlmostEqual(r1["draws"][name], r2["draws"][name])

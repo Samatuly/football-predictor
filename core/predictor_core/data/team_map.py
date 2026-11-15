@@ -1,10 +1,10 @@
-"""Соответствие кодов eloratings.net (World.tsv) и названий в наборе результатов martj42.
+"""Mapping between eloratings.net codes (World.tsv) and team names in the martj42 results dataset.
 
-Таблица team_map.csv построена из eloratings.net/en.teams.tsv (код + варианты названия):
-строка добавлена, только если ровно один вариант названия ТОЧНО совпал с названием в results.csv.
-Нечёткого поиска нет; пары, где названия различаются (Czechia / Czech Republic), добавляются
-вручную после проверки человеком. Код без строки — «не сопоставлен»
-и попадает в отчёт, прогноз по нему не делается.
+team_map.csv is built from eloratings.net/en.teams.tsv (code + name variants):
+a row is added only if exactly one name variant EXACTLY matches a name in results.csv.
+There is no fuzzy matching; pairs whose names differ (Czechia / Czech Republic) are added
+by hand after human review. A code without a row is "unmatched"
+and is reported; no forecast is made for it.
 """
 from __future__ import annotations
 

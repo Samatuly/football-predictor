@@ -1,7 +1,7 @@
-"""Чтение World.tsv с eloratings.net.
+"""Reader for World.tsv from eloratings.net.
 
-Столбцы (по файлу проекта от 13.11.2026): 0 — место, 2 — код страны, 3 — рейтинг.
-Официальной документации формата нет; если файл изменится, проверь столбцы.
+Columns (from the project file of 13 Nov 2026): 0 = rank, 2 = country code, 3 = rating.
+There is no official format documentation; if the file changes, check the columns.
 """
 from __future__ import annotations
 

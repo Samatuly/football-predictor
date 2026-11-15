@@ -1,8 +1,8 @@
-"""Подбор параметров elo_poisson на обучающем окне и проверка на тестовом.
+"""Fit elo_poisson parameters on the training window and evaluate on the test window.
 
-Рейтинги Elo считаются один раз пошагово (EloBook); от параметров модели они не зависят,
-поэтому подбор не может «подсмотреть» тестовое окно через рейтинги.
-Цель подбора — средний log-loss 1X2 на обучающем окне.
+Elo ratings are computed once, step by step (EloBook); they do not depend on model parameters,
+so the fit cannot peek at the test window through the ratings.
+The fit objective is the mean 1X2 log-loss on the training window.
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from .models import elo_poisson
 from .models.elo_poisson import EloPoissonParams
 from .ratings_elo import EloBook
 
-Row = tuple[float, bool, int, int]  # (Elo_дом - Elo_гости, нейтральное поле, исход, голов)
+Row = tuple[float, bool, int, int]  # (Elo_home - Elo_away, neutral venue, outcome, goals)
 
 
 def collect(matches: list[Match], start: date, end: date | None, min_games: int = 30) -> list[Row]:
@@ -31,7 +31,7 @@ def collect(matches: list[Match], start: date, end: date | None, min_games: int 
 
 
 def _probs_table(rows: list[Row], p: EloPoissonParams, fast: bool) -> dict:
-    """Кэш прогнозов по (округлённая разница Elo, нейтральное поле)."""
+    """Forecast cache keyed by (rounded Elo difference, neutral venue)."""
     cache: dict[tuple[int, bool], tuple[tuple[float, float, float], float]] = {}
     kw = {"iters": 30, "max_goals": 8} if fast else {}
     for diff, neutral, _, _ in rows:
@@ -70,9 +70,9 @@ GRID = {
 
 def fit(rows: list[Row], start: EloPoissonParams = EloPoissonParams(), rounds: int = 3,
         log=print) -> EloPoissonParams:
-    """Покоординатный поиск по сетке GRID (несколько проходов)."""
+    """Coordinate-wise search over the GRID (several passes)."""
     best, best_ll = start, evaluate(rows, start, fast=True)["log_loss"]
-    log(f"старт: log-loss {best_ll:.4f} {best.as_dict()}")
+    log(f"start: log-loss {best_ll:.4f} {best.as_dict()}")
     for r in range(rounds):
         improved = False
         for name, values in GRID.items():
@@ -81,7 +81,7 @@ def fit(rows: list[Row], start: EloPoissonParams = EloPoissonParams(), rounds: i
                 ll = evaluate(rows, cand, fast=True)["log_loss"]
                 if ll < best_ll - 1e-6:
                     best, best_ll, improved = cand, ll, True
-            log(f"проход {r + 1}, {name}: log-loss {best_ll:.4f} {best.as_dict()}")
+            log(f"pass {r + 1}, {name}: log-loss {best_ll:.4f} {best.as_dict()}")
         if not improved:
             break
     return best

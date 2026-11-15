@@ -147,8 +147,6 @@ Teams are identified by eloratings.net codes. Odds and `neutral` are optional.
 - [ ] Club competitions, xG, blending the model with market odds
 - [ ] Checking the ledger against results, tournament simulation
 
-> The `predict` command-line output is in English. Skill prompts, market names in generated reports and some code comments are still in Russian.
-
 ## Disclaimer
 
 This project is for research and educational purposes only.

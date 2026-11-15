@@ -1,12 +1,12 @@
 ---
 name: backtest
-description: "Walk-forward проверка моделей: log-loss, Brier, RPS, калибровка, сравнение с рынком. Этап 2."
+description: "Walk-forward model validation: log-loss, Brier, RPS, calibration, comparison with the market. Stage 2."
 ---
 
 # backtest
 
-**Ещё не реализовано.** Walk-forward проверка моделей: log-loss, Brier, RPS, калибровка, сравнение с рынком. Этап 2.
+**Not implemented yet.** Walk-forward model validation: log-loss, Brier, RPS, calibration, comparison with the market. Stage 2.
 
-Пока скилл не готов, скажи пользователю об этом и не подменяй расчёт рассуждением.
+Until this skill is ready, tell the user so and do not replace the calculation with reasoning.
 
-Правила плагина: `${CLAUDE_PLUGIN_ROOT}/skills/_shared/accuracy-rules.md`.
+Plugin rules: `${CLAUDE_PLUGIN_ROOT}/skills/_shared/accuracy-rules.md`.

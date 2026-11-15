@@ -1,10 +1,10 @@
-"""CLI: модель против рынка по всем рынкам одного матча.
+"""CLI: model vs market across all markets of one match.
 
 python core/markets_cli.py --odds predictions/odds/2026-11-14_KO-IL.json --as-of 2026-11-14 [--json]
 
-Файл коэффициентов: {"home": код, "away": код, "<группа>": {"<исход>": коэфф, ...}, ...};
-названия групп и исходов — как в predictor_core.markets.markets_full / first_half.
-Маржа снимается пропорционально внутри группы (у «двойного шанса» сумма вероятностей = 2).
+Odds file: {"home": code, "away": code, "<group>": {"<outcome>": odds, ...}, ...};
+group and outcome names are as in predictor_core.markets.markets_full / first_half.
+Margin is removed proportionally within a group ("double chance" probabilities sum to 2).
 """
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from predictor_core.data.team_map import load_team_map  # noqa: E402
 from predictor_core.markets import first_half, markets_full  # noqa: E402
 from predictor_core.models import dixon_coles as dc  # noqa: E402
 
-UNTESTED = {"1-й тайм 1X2", "1-й тайм тотал 0.5", "1-й тайм тотал 1.5", "1-й тайм ОЗ"}
+UNTESTED = {"1st half 1X2", "1st half total 0.5", "1st half total 1.5", "1st half BTTS"}
 
 
 def compare(odds: dict, as_of: date, results: str = str(base.DEFAULT_RESULTS)) -> dict:
@@ -33,24 +33,24 @@ def compare(odds: dict, as_of: date, results: str = str(base.DEFAULT_RESULTS)) -
     fit = dc.fit(matches, as_of, dc.DCConfig(half_life_days=base.DC_HALF_LIFE))
     g = fit.grid(h, a, neutral=False)
     model = {**markets_full(g), **first_half(g.lam_home, g.lam_away)}
-    if "Точный счёт" in model:
-        model["Точный счёт"]["Другой"] = 0.0  # заполняется ниже по списку рынка
+    if "Correct score" in model:
+        model["Correct score"]["Other"] = 0.0  # filled in below from the market list
     out = {"home": h, "away": a, "lam": [round(g.lam_home, 3), round(g.lam_away, 3)], "groups": {}}
     for group, sel in odds.items():
         if group.startswith("_") or group in ("home", "away"):
             continue
         if group not in model:
-            out["groups"][group] = {"error": "модель не считает этот рынок"}
+            out["groups"][group] = {"error": "the model does not price this market"}
             continue
         mp = dict(model[group])
-        if group == "Точный счёт":
-            listed = [k for k in sel if k != "Другой"]
+        if group == "Correct score":
+            listed = [k for k in sel if k != "Other"]
             mp = {k: model[group].get(k, 0.0) for k in listed}
-            mp["Другой"] = max(0.0, 1 - sum(mp.values()))
+            mp["Other"] = max(0.0, 1 - sum(mp.values()))
         priced = {k: v for k, v in sel.items() if v}
         inv = {k: 1 / v for k, v in priced.items()}
-        total = 2.0 if group == "Двойной шанс" else 1.0
-        complete = group == "Двойной шанс" or set(priced) == set(sel) and len(sel) == len(mp)
+        total = 2.0 if group == "Double chance" else 1.0
+        complete = group == "Double chance" or set(priced) == set(sel) and len(sel) == len(mp)
         s = sum(inv.values())
         rows = []
         for k, o in priced.items():
@@ -81,12 +81,12 @@ def main() -> None:
         if "error" in gr:
             print(f"\n{gname}: {gr['error']}")
             continue
-        m = f"маржа {gr['margin']:.1%}" if gr["margin"] is not None else "маржа —"
-        print(f"\n{gname} ({m}{', НЕ ПРОВЕРЕНО' if gr['untested'] else ''})")
+        m = f"margin {gr['margin']:.1%}" if gr["margin"] is not None else "margin —"
+        print(f"\n{gname} ({m}{', UNTESTED' if gr['untested'] else ''})")
         for x in gr["rows"]:
             fair = f"{x['market_fair']:.1%}" if x["market_fair"] is not None else "—"
             diff = f"{x['diff'] * 100:+.1f}" if x["diff"] is not None else "—"
-            print(f"  {x['sel']:8} {x['odds']:7.2f}  модель {x['model']:.1%}  рынок {fair:>6}  Δ {diff:>6}  EV {x['ev']:+.2f}")
+            print(f"  {x['sel']:8} {x['odds']:7.2f}  model {x['model']:.1%}  market {fair:>6}  Δ {diff:>6}  EV {x['ev']:+.2f}")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-"""Тесты ручных дополнений результатов (data/manual/*.csv)."""
+"""Tests for manual result additions (data/manual/*.csv)."""
 import csv
 import sys
 import tempfile
@@ -21,10 +21,10 @@ class TestManualFiles(unittest.TestCase):
         for p in MANUAL:
             with open(p, encoding="utf-8") as fh:
                 for r in csv.DictReader(fh):
-                    self.assertTrue(r["source"].strip(), f"{p.name}: нет источника")
+                    self.assertTrue(r["source"].strip(), f"{p.name}: no source")
                     int(r["home_score"]), int(r["away_score"])
 
-    @unittest.skipUnless(RESULTS.exists(), "нет data/raw/results.csv")
+    @unittest.skipUnless(RESULTS.exists(), "data/raw/results.csv not found")
     def test_team_names_exist_in_results(self):
         names = set()
         with open(RESULTS, encoding="utf-8") as fh:

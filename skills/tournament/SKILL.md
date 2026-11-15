@@ -1,12 +1,12 @@
 ---
 name: tournament
-description: "Монте-Карло симуляция турниров. Этап 7."
+description: "Monte Carlo tournament simulation. Stage 7."
 ---
 
 # tournament
 
-**Ещё не реализовано.** Монте-Карло симуляция турниров. Этап 7.
+**Not implemented yet.** Monte Carlo tournament simulation. Stage 7.
 
-Пока скилл не готов, скажи пользователю об этом и не подменяй расчёт рассуждением.
+Until this skill is ready, tell the user so and do not replace the calculation with reasoning.
 
-Правила плагина: `${CLAUDE_PLUGIN_ROOT}/skills/_shared/accuracy-rules.md`.
+Plugin rules: `${CLAUDE_PLUGIN_ROOT}/skills/_shared/accuracy-rules.md`.

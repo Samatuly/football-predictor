@@ -1,23 +1,23 @@
-"""Снятие маржи букмекера и сравнение с моделью."""
+"""Bookmaker margin removal and comparison with the model."""
 from __future__ import annotations
 
 
 def overround(odds: list[float]) -> float:
-    """Маржа: сумма обратных коэффициентов минус 1."""
+    """Margin: sum of inverse odds minus 1."""
     return sum(1 / o for o in odds) - 1
 
 
 def devig_proportional(odds: list[float]) -> list[float]:
-    """Пропорциональное снятие маржи (метод отчёта 13.11)."""
+    """Proportional margin removal."""
     inv = [1 / o for o in odds]
     s = sum(inv)
     return [x / s for x in inv]
 
 
 def devig_power(odds: list[float]) -> list[float]:
-    """Степенной метод: p_i = (1/o_i)^k, k подбирается так, чтобы сумма = 1.
+    """Power method: p_i = (1/o_i)^k, with k chosen so that the sum is 1.
 
-    Сильнее, чем пропорциональный, режет аутсайдеров (учитывает перекос рынка в их сторону).
+    Cuts outsiders more than the proportional method (accounts for the market skew towards them).
     """
     inv = [1 / o for o in odds]
     lo, hi = 1.0, 10.0
@@ -31,5 +31,5 @@ def devig_power(odds: list[float]) -> list[float]:
 
 
 def expected_value(prob: float, odds: float) -> float:
-    """Ожидаемая прибыль на 1 единицу ставки при вероятности prob."""
+    """Expected profit per 1 unit staked at probability prob."""
     return prob * odds - 1

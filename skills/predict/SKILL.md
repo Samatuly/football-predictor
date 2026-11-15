@@ -1,41 +1,41 @@
 ---
 name: predict
-description: "Вероятностный прогноз матча или тура сборных: модель Диксона–Коулза (или Elo → Пуассон) → рынки (1X2, тоталы, ОЗ, точный счёт, таймы) → сравнение с букмекером без маржи → отчёт и запись в журнал. Используй, когда пользователь просит прогноз, вероятности исходов или сравнение с коэффициентами."
-argument-hint: "[матч(и) или тур, коэффициенты по желанию]"
+description: "Probabilistic forecast for a match or a round of international fixtures: Dixon–Coles model (or Elo → Poisson) → markets (1X2, totals, BTTS, correct score, halves) → comparison with bookmaker odds after margin removal → report and ledger entry. Use when the user asks for a forecast, outcome probabilities, or a comparison with odds."
+argument-hint: "[match(es) or round, odds optional]"
 allowed-tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 ---
 
 # Predict
 
-Прочитай `${CLAUDE_PLUGIN_ROOT}/skills/_shared/accuracy-rules.md` и следуй ему.
+Read `${CLAUDE_PLUGIN_ROOT}/skills/_shared/accuracy-rules.md` and follow it.
 
-## Шаги
+## Steps
 
-1. **Матчи.** Запиши их в CSV: `home,away,odds_1,odds_x,odds_2,odds_under25,odds_over25,neutral`.
-   - Коды команд — как в eloratings.net (`NL`, `GR`, ...).
-   - Порядок тотала: сначала «меньше 2.5», потом «больше 2.5». Если по источнику неясно, какой коэффициент чей,
-     спроси пользователя — не угадывай.
-   - Коэффициенты бери только у пользователя или из источника, который он назвал.
-2. **Модель.** По умолчанию `dixon_coles` — она сильнее на бэктесте (нужен numpy и
-   `${CLAUDE_PLUGIN_ROOT}/data/raw/results.csv`). `elo_poisson` — запасной вариант без внешних пакетов
-   (нужен свежий `World.tsv`).
-3. **Расчёт** — только через ядро, никаких цифр «из головы»:
+1. **Matches.** Write them to a CSV: `home,away,odds_1,odds_x,odds_2,odds_under25,odds_over25,neutral`.
+   - Team codes are eloratings.net codes (`NL`, `GR`, ...).
+   - Totals order: "under 2.5" first, then "over 2.5". If the source does not make it clear which odds belong to which,
+     ask the user. Do not guess.
+   - Take odds only from the user or from a source the user named.
+2. **Model.** The default is `dixon_coles`, which is stronger in the backtest (needs numpy and
+   `${CLAUDE_PLUGIN_ROOT}/data/raw/results.csv`). `elo_poisson` is the fallback without external packages
+   (needs a fresh `World.tsv`).
+3. **Calculation** goes through the core only. No numbers from memory:
    ```bash
-   python "${CLAUDE_PLUGIN_ROOT}/core/predict.py" --fixtures <fixtures.csv> --as-of <дата матчей> --json --log
+   python "${CLAUDE_PLUGIN_ROOT}/core/predict.py" --fixtures <fixtures.csv> --as-of <match date> --json --log
    ```
-   Для Elo: добавь `--model elo_poisson --elo <World.tsv>`. `--log` пишет прогноз в `predictions/ledger.jsonl`;
-   не используй `--log` для матчей, которые уже сыграны.
-4. **Проверь вывод:**
-   - `warnings` — перенеси в отчёт. Если данные устарели (`days_stale` > 30), скажи пользователю и предложи
-     обновить `results.csv` (источник — `data/raw/results.SOURCE.txt`; скачивание — только с его согласия).
-   - `extra_added` — сколько матчей подмешано из `data/manual/*.csv` (ручные дополнения с источником в каждой строке).
-   - `unmatched` — назови каждую строку. Код без строки в `core/predictor_core/data/team_map.csv` добавляй,
-     только проверив, что название точно есть в `results.csv`; иначе спроси пользователя.
-5. **Контекст** (травмы, ротация) — по желанию, агентом `context-scout`. Он даёт факты с источниками, не проценты.
-6. **Отчёт** — по `skills/_shared/report-template.md`, в `predictions/reports/YYYY-MM-DD_<тема>.md`.
+   For Elo, add `--model elo_poisson --elo <World.tsv>`. `--log` writes the forecast to `predictions/ledger.jsonl`;
+   do not use `--log` for matches that have already been played.
+4. **Check the output:**
+   - `warnings`: carry them into the report. If the data is stale (`days_stale` > 30), tell the user and suggest
+     updating `results.csv` (source: `data/raw/results.SOURCE.txt`; download only with the user's consent).
+   - `extra_added`: how many matches were merged from `data/manual/*.csv` (manual additions with a source on every row).
+   - `unmatched`: name every row. Add a code missing from `core/predictor_core/data/team_map.csv` only after
+     checking that the name exists exactly in `results.csv`; otherwise ask the user.
+5. **Context** (injuries, rotation) is optional, via the `context-scout` agent. It returns facts with sources, not percentages.
+6. **Report** follows `skills/_shared/report-template.md` and goes to `predictions/reports/YYYY-MM-DD_<topic>.md`.
 
-## Ограничения (называй их в отчёте)
+## Limitations (state them in the report)
 
-- Статус и слабости моделей — в `accuracy-rules.md`, раздел «Статус моделей».
-- Доля голов 1-го тайма 45% (рынки «тайм → итог») — допущение без источника и без бэктеста.
-- Нет xG, травм и составов.
+- Model status and weaknesses are in `accuracy-rules.md`, section "Model status".
+- The first-half goal share of 45% (half-time/full-time markets) is an assumption with no source and no backtest.
+- There is no xG, injury or lineup data.

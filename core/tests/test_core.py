@@ -1,4 +1,4 @@
-"""Тесты ядра. Запуск: python -m unittest discover -s core/tests"""
+"""Core tests. Run: python -m unittest discover -s core/tests"""
 import sys
 import unittest
 from pathlib import Path
@@ -16,7 +16,7 @@ import predict as cli  # noqa: E402
 WORLD_TSV = HERE.parents[2] / "scripts" / "world.tsv"
 FIXTURES = HERE / "fixtures" / "2026-11-13.csv"
 
-# Ожидаемые голы из отчёта analysis_2026-11-13.md, раздел 4
+# Expected goals from the 13 Nov 2026 analysis report, section 4
 REPORT_LAMBDAS = {
     ("NL", "GR"): (2.21, 0.61), ("RS", "DE"): (0.98, 1.66), ("SQ", "NM"): (2.26, 0.58),
     ("SI", "CH"): (0.87, 1.82), ("BG", "IS"): (1.14, 1.42), ("LU", "EE"): (1.53, 1.06),
@@ -67,13 +67,13 @@ class TestOdds(unittest.TestCase):
         for f in (devig_proportional, devig_power):
             self.assertAlmostEqual(sum(f(odds)), 1.0, places=5)
         self.assertGreater(overround(odds), 0)
-        # степенной метод сильнее режет аутсайдера
+        # the power method cuts the outsider more
         self.assertLess(devig_power(odds)[2], devig_proportional(odds)[2])
 
 
-@unittest.skipUnless(WORLD_TSV.exists(), "нет scripts/world.tsv")
+@unittest.skipUnless(WORLD_TSV.exists(), "scripts/world.tsv not found")
 class TestReproducesReport(unittest.TestCase):
-    """Этап 1: ядро должно воспроизвести отчёт 13.11.2026 (scripts/m.py)."""
+    """Stage 1: the core must reproduce the 13 Nov 2026 report (scripts/m.py)."""
 
     def test_lambdas(self):
         results, unmatched = cli.run(str(WORLD_TSV), str(FIXTURES), elo_poisson.ORIGINAL)
@@ -85,7 +85,7 @@ class TestReproducesReport(unittest.TestCase):
             self.assertAlmostEqual(r["lam_away"], ea, delta=0.006, msg=f"{r['home']}-{r['away']}")
 
     def test_ht_ft_slovakia(self):
-        # отчёт, раздел 10: Словакия — Фареры 1-0 -> 2-0, 8.4%
+        # report, section 10: Slovakia — Faroe Islands 1-0 -> 2-0, 8.4%
         top = halftime_fulltime_scores(2.56, 0.40)
         self.assertEqual(top[0][0], "1-0 -> 2-0")
         self.assertAlmostEqual(top[0][1], 0.084, delta=0.001)
@@ -102,10 +102,10 @@ class TestMarketsFull(unittest.TestCase):
         g = dc_grid(1.8, 1.3, -0.05)
         from predictor_core.markets import NOT_EXHAUSTIVE
         for name, grp in {**markets_full(g), **first_half(1.8, 1.3)}.items():
-            if name == "Сухая победа":
+            if name == "Win to nil":
                 self.assertIn(name, NOT_EXHAUSTIVE)
                 continue
             total = sum(grp.values())
-            expected = 2.0 if name == "Двойной шанс" else 1.0
-            tol = 5e-3 if name == "Точный счёт" else 1e-6  # точный счёт обрезан до 6 голов
+            expected = 2.0 if name == "Double chance" else 1.0
+            tol = 5e-3 if name == "Correct score" else 1e-6  # correct score is truncated at 6 goals
             self.assertAlmostEqual(total, expected, delta=tol, msg=name)

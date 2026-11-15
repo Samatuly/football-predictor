@@ -1,14 +1,14 @@
-# Прогноз: <тема>, <дата>
+# Forecast: <topic>, <date>
 
-> Вероятностная оценка, а не совет делать ставки. Модель: <имя> (<проверена/не проверена>). Уверенность: <низкая/средняя/высокая>.
+> A probability estimate, not betting advice. Model: <name> (<validated/not validated>). Confidence: <low/medium/high>.
 
-## Источники
+## Sources
 - [S1] ...
-## Допущения
+## Assumptions
 - [A1] ...
-## Прогноз
-| Матч | П1 | Х | П2 | ТБ2.5 | ОЗ | λ | Топ-3 счёта |
-## Модель против рынка (без маржи)
-| Матч | Δ П1 | Δ Х | Δ П2 | Δ ТБ2.5 | Маржа 1X2 |
-## Контекст
-## Ограничения
+## Forecast
+| Match | 1 | X | 2 | O2.5 | BTTS | λ | Top 3 scores |
+## Model vs market (margin removed)
+| Match | Δ 1 | Δ X | Δ 2 | Δ O2.5 | 1X2 margin |
+## Context
+## Limitations

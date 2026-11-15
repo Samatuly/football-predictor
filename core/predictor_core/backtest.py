@@ -1,9 +1,9 @@
-"""Walk-forward бэктест моделей 1X2 на матчах сборных.
+"""Walk-forward backtest of 1X2 models on international matches.
 
-Для каждого матча по порядку дат:
-  1. все модели прогнозируют, видя только прошлое;
-  2. прогноз записывается, если матч в окне оценки и у обеих команд >= min_games матчей;
-  3. только после этого рейтинги и базовые частоты обновляются результатом.
+For each match in date order:
+  1. every model forecasts, seeing only the past;
+  2. the forecast is recorded if the match is inside the evaluation window and both teams have >= min_games matches;
+  3. only then are ratings and base rates updated with the result.
 """
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ Probs = tuple[float, float, float]
 
 @dataclass
 class BaseRates:
-    """Частоты П1/Х/П2 по прошлым матчам — отдельно для нейтрального поля и с хозяевами."""
+    """H/D/A frequencies from past matches, separately for neutral venues and for matches with a home side."""
     counts: dict[bool, list[int]] = field(default_factory=lambda: {True: [1, 1, 1], False: [1, 1, 1]})
 
     def predict(self, neutral: bool) -> Probs:
@@ -43,12 +43,12 @@ def _elo_poisson(params: elo_poisson.EloPoissonParams) -> Callable[[float, float
 def run(matches: list[Match], start: date, end: date | None = None, min_games: int = 30,
         exclude_friendlies: bool = False, variants: dict | None = None) -> dict:
     variants = variants or {
-        "elo_poisson (текущая: T=2.5+0.0012|dr|)": elo_poisson.EloPoissonParams(),
-        "elo_poisson (T=2.6 постоянный)": elo_poisson.EloPoissonParams(base_total=2.6, total_slope=0.0),
+        "elo_poisson (current: T=2.5+0.0012|dr|)": elo_poisson.EloPoissonParams(),
+        "elo_poisson (T=2.6 constant)": elo_poisson.EloPoissonParams(base_total=2.6, total_slope=0.0),
     }
     models = {name: _elo_poisson(p) for name, p in variants.items()}
     book, base = EloBook(), BaseRates()
-    rows: dict[str, list[tuple[Probs, int]]] = {n: [] for n in [*models, "базовые частоты", "равные 1/3"]}
+    rows: dict[str, list[tuple[Probs, int]]] = {n: [] for n in [*models, "base rates", "uniform 1/3"]}
     goals_pred: dict[str, float] = {n: 0.0 for n in models}
     goals_actual = 0
     draws_pred = {n: 0.0 for n in models}
@@ -64,13 +64,13 @@ def run(matches: list[Match], start: date, end: date | None = None, min_games: i
                 rows[name].append((probs, m.outcome))
                 goals_pred[name] += total
                 draws_pred[name] += probs[1]
-            rows["базовые частоты"].append((base.predict(m.neutral), m.outcome))
-            rows["равные 1/3"].append(((1 / 3, 1 / 3, 1 / 3), m.outcome))
+            rows["base rates"].append((base.predict(m.neutral), m.outcome))
+            rows["uniform 1/3"].append(((1 / 3, 1 / 3, 1 / 3), m.outcome))
             goals_actual += m.home_goals + m.away_goals
         book.update(m)
         base.update(m)
 
-    n = len(rows["равные 1/3"])
+    n = len(rows["uniform 1/3"])
     first = next(iter(models))
     return {
         "n": n,
@@ -79,5 +79,5 @@ def run(matches: list[Match], start: date, end: date | None = None, min_games: i
                   **{name: goals_pred[name] / n if n else 0 for name in models}},
         "draws": {"actual_rate": sum(1 for _, o in rows[first] if o == 1) / n if n else 0,
                   **{name: draws_pred[name] / n if n else 0 for name in models}},
-        "calibration": {k: calibration(rows[first], i) for i, k in enumerate(("П1", "Х", "П2"))},
+        "calibration": {k: calibration(rows[first], i) for i, k in enumerate(("H", "D", "A"))},
     }

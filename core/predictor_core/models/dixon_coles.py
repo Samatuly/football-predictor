@@ -1,18 +1,18 @@
-"""Модель Диксона–Коулза (Dixon & Coles, 1997) с затуханием по времени.
+"""Dixon–Coles model (Dixon & Coles, 1997) with time decay.
 
-    log λ_дом   = μ + h·[не нейтральное поле] + att[дом]   − def[гости]
-    log λ_гости = μ +                          att[гости] − def[дом]
+    log λ_home  = μ + h·[not neutral venue] + att[home]  − def[away]
+    log λ_away  = μ +                          att[away]  − def[home]
     P(x, y) = τ(x, y; λ, μ_, ρ) · Poisson(x; λ) · Poisson(y; μ_)
 
-τ — поправка низких счетов из статьи DC: τ(0,0)=1−λμρ, τ(0,1)=1+λρ, τ(1,0)=1+μρ, τ(1,1)=1−ρ.
-Вес матча: exp(−ln2 · дней_до_даты_подгонки / half_life). L2-регуляризация att/def (ridge).
+τ is the low-score correction from the DC paper: τ(0,0)=1−λμρ, τ(0,1)=1+λρ, τ(1,0)=1+μρ, τ(1,1)=1−ρ.
+Match weight: exp(−ln2 · days_before_fit_date / half_life). L2 regularisation of att/def (ridge).
 
-Подгонка в два шага (стандартное упрощение):
-  1. μ, h, att, def — градиентным спуском (Adam) по взвешенному правдоподобию Пуассона;
-  2. ρ — одномерным поиском по взвешенному правдоподобию с τ.
+Fitting in two steps (a standard simplification):
+  1. μ, h, att, def by gradient descent (Adam) on the weighted Poisson likelihood;
+  2. ρ by a one-dimensional search on the weighted likelihood with τ.
 
-Идея затухания и регуляризации — по Mintahandrews/football-predictor (MIT, TypeScript);
-код написан заново на Python/numpy.
+The decay and regularisation idea comes from Mintahandrews/football-predictor (MIT, TypeScript);
+the code was rewritten from scratch in Python/numpy.
 """
 from __future__ import annotations
 
@@ -75,7 +75,7 @@ def dc_grid(lh: float, la: float, rho: float, max_goals: int = 10) -> ScoreGrid:
 
 
 def fit(matches: list[Match], as_of: date, cfg: DCConfig = DCConfig()) -> DCFit:
-    """Подгонка только по матчам строго ДО as_of (без утечки будущего)."""
+    """Fit using only matches strictly BEFORE as_of (no look-ahead leakage)."""
     lo = as_of.toordinal() - int(cfg.window_years * 365.25)
     rows = [m for m in matches if lo <= m.date.toordinal() < as_of.toordinal()]
     teams: dict[str, int] = {}
@@ -92,7 +92,7 @@ def fit(matches: list[Match], as_of: date, cfg: DCConfig = DCConfig()) -> DCFit:
     w = np.exp(-math.log(2) * days / cfg.half_life_days)
     w = w / w.sum() * len(rows)
 
-    # параметры: [mu, home, att(n_t), def(n_t)]
+    # parameters: [mu, home, att(n_t), def(n_t)]
     theta = np.zeros(2 + 2 * n_t)
     theta[0] = math.log(max(float((hg.sum() + ag.sum()) / (2 * len(rows))), 0.1))
     m1 = np.zeros_like(theta)
@@ -104,7 +104,7 @@ def fit(matches: list[Match], as_of: date, cfg: DCConfig = DCConfig()) -> DCFit:
         att, dfn = theta[2:2 + n_t], theta[2 + n_t:]
         lh = np.exp(mu + h * nh + att[hi] - dfn[ai])
         la = np.exp(mu + att[ai] - dfn[hi])
-        rh = w * (hg - lh)  # d logL / d log λ_дом
+        rh = w * (hg - lh)  # d logL / d log λ_home
         ra = w * (ag - la)
         g = np.zeros_like(theta)
         g[0] = rh.sum() + ra.sum()
@@ -113,11 +113,11 @@ def fit(matches: list[Match], as_of: date, cfg: DCConfig = DCConfig()) -> DCFit:
         g_def = -np.bincount(ai, rh, n_t) - np.bincount(hi, ra, n_t)
         g[2:2 + n_t] = g_att - cfg.ridge * n * att / n_t
         g[2 + n_t:] = g_def - cfg.ridge * n * dfn / n_t
-        g = -g / n  # минимизируем −logL/n
+        g = -g / n  # minimise −logL/n
         m1 = b1 * m1 + (1 - b1) * g
         v1 = b2 * v1 + (1 - b2) * g * g
         theta -= cfg.lr * (m1 / (1 - b1**t)) / (np.sqrt(v1 / (1 - b2**t)) + eps)
-        # идентифицируемость: средние att и def = 0
+        # identifiability: mean att and def = 0
         theta[2:2 + n_t] -= theta[2:2 + n_t].mean()
         theta[2 + n_t:] -= theta[2 + n_t:].mean()
 

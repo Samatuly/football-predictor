@@ -1,12 +1,12 @@
 ---
 name: data
-description: "Загрузка и кэширование данных: результаты, xG, Elo, коэффициенты; склейка команд по ID. Этап 2."
+description: "Downloading and caching data: results, xG, Elo, odds; joining teams by ID. Stage 2."
 ---
 
 # data
 
-**Ещё не реализовано.** Загрузка и кэширование данных: результаты, xG, Elo, коэффициенты; склейка команд по ID. Этап 2.
+**Not implemented yet.** Downloading and caching data: results, xG, Elo, odds; joining teams by ID. Stage 2.
 
-Пока скилл не готов, скажи пользователю об этом и не подменяй расчёт рассуждением.
+Until this skill is ready, tell the user so and do not replace the calculation with reasoning.
 
-Правила плагина: `${CLAUDE_PLUGIN_ROOT}/skills/_shared/accuracy-rules.md`.
+Plugin rules: `${CLAUDE_PLUGIN_ROOT}/skills/_shared/accuracy-rules.md`.

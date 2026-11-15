@@ -1,8 +1,8 @@
-"""Walk-forward сравнение elo_poisson и dixon_coles на одних и тех же матчах.
+"""Walk-forward comparison of elo_poisson and dixon_coles on the same matches.
 
-Dixon–Coles переподгоняется каждые refit_days дней только по матчам до даты подгонки;
-матч оценивается последней подгонкой, сделанной не позже его даты.
-Набор матчей — как в бэктесте Elo: обе команды сыграли >= min_games матчей.
+Dixon–Coles is refitted every refit_days days using only matches before the fit date;
+a match is scored with the latest fit made no later than its date.
+The match set is the same as in the Elo backtest: both teams played >= min_games matches.
 """
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ def run(matches: list[Match], start: date, end: date | None, cfg: dc.DCConfig,
         if in_win and m.date >= next_refit:
             fit = dc.fit(matches, m.date, cfg)
             next_refit = m.date + timedelta(days=refit_days)
-            log(f"  подгонка на {m.date}: {fit.n_matches} матчей, {len(fit.teams)} команд, ρ={fit.rho:+.2f}, поле={fit.home:+.2f}")
+            log(f"  fit on {m.date}: {fit.n_matches} matches, {len(fit.teams)} teams, ρ={fit.rho:+.2f}, home={fit.home:+.2f}")
         if (in_win and book.games[m.home] >= min_games and book.games[m.away] >= min_games):
             if fit is None or not (fit.has(m.home) and fit.has(m.away)):
                 skipped += 1

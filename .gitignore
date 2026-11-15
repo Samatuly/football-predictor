@@ -3,18 +3,18 @@ __pycache__/
 *.pyc
 .venv/
 
-# Скачанные данные: большие и восстанавливаются по data/raw/*.SOURCE.txt
+# Downloaded data: large, restorable from data/raw/*.SOURCE.txt
 data/raw/*
 !data/raw/*.SOURCE.txt
 data/processed/
 data/cache/
 
-# Личный журнал прогнозов
+# Personal forecast ledger
 predictions/ledger.jsonl
 
-# Резервные копии
+# Backups
 *.bak
 
-# Сгенерированные отчёты, прогнозы и ручные данные
+# Generated reports, forecasts and manual data
 predictions/
 data/manual/*.csv

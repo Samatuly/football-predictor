@@ -1,10 +1,10 @@
-"""Матрица вероятностей счетов из двух независимых Пуассонов."""
+"""Scoreline probability matrix from two independent Poissons."""
 from __future__ import annotations
 
 import math
 from dataclasses import dataclass
 
-MAX_GOALS = 10  # P(k > 10) пренебрежимо мала при λ <= 4
+MAX_GOALS = 10  # P(k > 10) is negligible for λ <= 4
 
 
 def poisson_pmf(lam: float, k: int) -> float:
@@ -13,7 +13,7 @@ def poisson_pmf(lam: float, k: int) -> float:
 
 @dataclass(frozen=True)
 class ScoreGrid:
-    """grid[i][j] = P(хозяева забили i, гости j)."""
+    """grid[i][j] = P(home scored i, away scored j)."""
 
     lam_home: float
     lam_away: float
@@ -27,9 +27,9 @@ class ScoreGrid:
         return cls(lam_home, lam_away, g)
 
     def with_low_score_boost(self, delta: float) -> "ScoreGrid":
-        """Поправка в духе Диксона–Коулза: 0-0 и 1-1 × (1+δ), 1-0 и 0-1 × (1-δ), затем нормировка.
+        """Dixon–Coles-style correction: 0-0 and 1-1 × (1+δ), 1-0 and 0-1 × (1-δ), then renormalise.
 
-        δ > 0 поднимает долю ничьих, которую независимый Пуассон недооценивает.
+        δ > 0 raises the share of draws, which independent Poissons underestimate.
         """
         if delta == 0:
             return self
@@ -46,7 +46,7 @@ class ScoreGrid:
         return sum(self.grid[i][j] for i in range(n) for j in range(n) if cond(i, j))
 
     def outcome(self) -> tuple[float, float, float]:
-        """(П1, Х, П2)."""
+        """(home win, draw, away win)."""
         return (self.prob(lambda i, j: i > j), self.prob(lambda i, j: i == j), self.prob(lambda i, j: i < j))
 
     def top_scores(self, k: int = 3) -> list[tuple[str, float]]:

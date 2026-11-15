@@ -1,4 +1,4 @@
-"""CLI: walk-forward бэктест.
+"""CLI: walk-forward backtest.
 
 python core/backtest_cli.py --results data/raw/results.csv --start 2010-01-01 [--no-friendlies] [--json]
 """
@@ -19,7 +19,7 @@ from predictor_core.data.results import load_results  # noqa: E402
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    ap = argparse.ArgumentParser(description="Walk-forward бэктест моделей 1X2 на матчах сборных.")
+    ap = argparse.ArgumentParser(description="Walk-forward backtest of 1X2 models on international matches.")
     ap.add_argument("--results", required=True)
     ap.add_argument("--start", default="2010-01-01")
     ap.add_argument("--end")
@@ -34,16 +34,16 @@ def main() -> None:
         print(json.dumps(res, ensure_ascii=False, indent=2))
         return
 
-    print(f"Матчей в оценке: {res['n']}\n")
-    print(f"{'Модель':45} {'log-loss':>9} {'Brier':>7} {'RPS':>7} {'Угадано':>8}")
+    print(f"Matches evaluated: {res['n']}\n")
+    print(f"{'Model':45} {'log-loss':>9} {'Brier':>7} {'RPS':>7} {'Accuracy':>8}")
     for name, s in sorted(res["summary"].items(), key=lambda kv: kv[1]["log_loss"]):
         print(f"{name:45} {s['log_loss']:9.4f} {s['brier']:7.4f} {s['rps']:7.4f} {s['accuracy']:8.1%}")
-    print(f"\nГолов за матч: факт {res['goals']['actual_mean']:.2f}; " +
+    print(f"\nGoals per match: actual {res['goals']['actual_mean']:.2f}; " +
           "; ".join(f"{k}: {v:.2f}" for k, v in res["goals"].items() if k != "actual_mean"))
-    print(f"Доля ничьих: факт {res['draws']['actual_rate']:.1%}; " +
+    print(f"Draw rate: actual {res['draws']['actual_rate']:.1%}; " +
           "; ".join(f"{k}: {v:.1%}" for k, v in res["draws"].items() if k != "actual_rate"))
     for k, rows in res["calibration"].items():
-        print(f"\nКалибровка {k} (прогноз → факт, n):")
+        print(f"\nCalibration {k} (predicted → observed, n):")
         for r in rows:
             print(f"  {r['bin']}: {r['predicted']:.2f} → {r['observed']:.2f}  (n={r['n']})")
 

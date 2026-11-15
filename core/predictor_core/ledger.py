@@ -1,4 +1,4 @@
-"""Журнал прогнозов (JSONL): одна строка на матч, только дописывание."""
+"""Forecast ledger (JSONL): one line per match, append-only."""
 from __future__ import annotations
 
 import json

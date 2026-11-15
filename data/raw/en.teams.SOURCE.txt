@@ -1,1 +1,1 @@
-source: https://www.eloratings.net/en.teams.tsv | eloratings.net, лицензия не указана | downloaded 2026-11-13
+source: https://www.eloratings.net/en.teams.tsv | eloratings.net, license not specified | downloaded 2026-11-13

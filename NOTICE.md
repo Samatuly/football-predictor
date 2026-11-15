@@ -1,9 +1,9 @@
-# Заимствования
+# Third-party material
 
-| Компонент | Источник | Лицензия | Как используется |
+| Component | Source | License | How it is used |
 |---|---|---|---|
-| Elo → Пуассон, снятие маржи, таймы | собственные скрипты автора (`scripts/m.py`, `mk.py`, `ht.py`) | авторская | основа `core/` |
-| Данные, ID, метрики | withqwerty/nutmeg, football-docs | не указана | как внешний сервис, код не копируется |
-| Затухание по времени, регуляризация в модели Диксона–Коулза | Mintahandrews/football-predictor | MIT | идея; код написан заново на Python/numpy |
-| Поправка τ низких счетов | Dixon & Coles (1997) | статья | формула |
-| Смешивание с рынком, счёт по исходу (план) | DOsinga/football_predictions | не указана | только идеи |
+| Elo → Poisson, margin removal, half-time markets | the author's own scripts (`scripts/m.py`, `mk.py`, `ht.py`) | author's own | basis of `core/` |
+| Data, IDs, metrics | withqwerty/nutmeg, football-docs | not specified | used as an external service; no code is copied |
+| Time decay and regularisation in the Dixon–Coles model | Mintahandrews/football-predictor | MIT | idea only; code rewritten in Python/numpy |
+| Low-score correction τ | Dixon & Coles (1997) | paper | formula |
+| Blending with the market, score given outcome (planned) | DOsinga/football_predictions | not specified | ideas only |

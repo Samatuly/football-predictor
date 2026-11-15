@@ -1,12 +1,12 @@
 ---
 name: track
-description: "Сверка прогнозов из predictions/ledger.jsonl с результатами. Этап 7."
+description: "Checking forecasts from predictions/ledger.jsonl against results. Stage 7."
 ---
 
 # track
 
-**Ещё не реализовано.** Сверка прогнозов из predictions/ledger.jsonl с результатами. Этап 7.
+**Not implemented yet.** Checking forecasts from predictions/ledger.jsonl against results. Stage 7.
 
-Пока скилл не готов, скажи пользователю об этом и не подменяй расчёт рассуждением.
+Until this skill is ready, tell the user so and do not replace the calculation with reasoning.
 
-Правила плагина: `${CLAUDE_PLUGIN_ROOT}/skills/_shared/accuracy-rules.md`.
+Plugin rules: `${CLAUDE_PLUGIN_ROOT}/skills/_shared/accuracy-rules.md`.

@@ -1,11 +1,11 @@
-"""Пошаговый (walk-forward) Elo для сборных.
+"""Step-by-step (walk-forward) Elo for national teams.
 
-Рейтинги на дату матча считаются только по матчам, сыгранным раньше: сначала прогноз,
-потом обновление. Поэтому утечки будущего нет по построению.
+Ratings on a match date use only earlier matches: forecast first,
+then update. So there is no look-ahead leakage by construction.
 
-Формула в стиле World Football Elo (eloratings.net): K зависит от турнира, множитель
-за разницу мячей, +100 хозяевам. Коэффициенты K и множитель — по памяти, не сверены
-с первоисточником (метка: unverified). Это НЕ точная копия рейтингов eloratings.net.
+The formula follows World Football Elo (eloratings.net): K depends on the tournament, with a multiplier
+for goal difference and +100 for the home side. The K values and multiplier are from memory and not checked
+against the original source (label: unverified). This is NOT an exact copy of the eloratings.net ratings.
 """
 from __future__ import annotations
 
@@ -46,7 +46,7 @@ class EloBook:
         self.games: dict[str, int] = defaultdict(int)
 
     def pre_match(self, m: Match) -> tuple[float, float]:
-        """Рейтинги ДО матча."""
+        """Ratings BEFORE the match."""
         return self.rating[m.home], self.rating[m.away]
 
     def update(self, m: Match) -> None:

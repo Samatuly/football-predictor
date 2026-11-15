@@ -48,18 +48,21 @@ python core/predict.py --fixtures core/tests/fixtures/2026-11-13.csv --as-of 202
 ```
 
 ```
-NL-GR | λ 1.82-0.87 | 59%/24%/17% ТБ2.5 50% ОЗ 49% | 1-0(12%) 2-0(11%) 1-1(11%) | Δ рынок -2/+3/-1 п.п., ТБ2.5 -13 п.п.
-RS-DE | λ 1.21-1.95 | 23%/23%/54% ТБ2.5 61% ОЗ 60% | 1-1(10%) 1-2(10%) 0-2(8%)  | Δ рынок +13/+8/-22 п.п., ТБ2.5 -4 п.п.
+Model dixon_coles. Not betting advice.
+WARNING: Stronger than elo_poisson in the 2010–2026 backtest; on 13 Nov the bookmaker odds were more accurate on 1X2.
+
+NL-GR | λ 1.82-0.87 | 59%/24%/17% O2.5 50% BTTS 49% | 1-0(12%) 2-0(11%) 1-1(11%) | vs market -2/+3/-1 pp, O2.5 -13 pp
+RS-DE | λ 1.21-1.95 | 23%/23%/54% O2.5 61% BTTS 60% | 1-1(10%) 1-2(10%) 0-2(8%) | vs market +13/+8/-22 pp, O2.5 -4 pp
 ```
 
-How to read a line (output labels are currently in Russian):
+How to read a line:
 
 - `NL-GR`: Netherlands vs Greece (eloratings.net team codes).
 - `λ 1.82-0.87`: expected goals for home and away.
 - `59%/24%/17%`: home win / draw / away win.
-- `ТБ2.5` is over 2.5 goals, `ОЗ` is both teams to score.
+- `O2.5`: over 2.5 goals. `BTTS`: both teams to score.
 - `1-0(12%) 2-0(11%) 1-1(11%)`: the most likely correct scores.
-- `Δ рынок`: difference from the margin-free bookmaker probabilities, in percentage points.
+- `vs market`: difference from the margin-free bookmaker probabilities, in percentage points.
 
 ## Installation
 
@@ -144,7 +147,7 @@ Teams are identified by eloratings.net codes. Odds and `neutral` are optional.
 - [ ] Club competitions, xG, blending the model with market odds
 - [ ] Checking the ledger against results, tournament simulation
 
-> Skill prompts and generated reports are currently in Russian.
+> The `predict` command-line output is in English. Skill prompts, market names in generated reports and some code comments are still in Russian.
 
 ## Disclaimer
 
